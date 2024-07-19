@@ -1,18 +1,21 @@
+import os
+import sys
 import requests
 import pandas as pd
 import numpy as np
-from rdkit.Chem import Crippen, Descriptors, MolFromSmiles, QED
+from rdkit.Chem import Crippen, Descriptors, MolFromSmiles, QED, RDConfig
 from selfies import encoder as sf_encoder
 
 # Custom functions
-from util.sas import calculateScore
+sys.path.append(os.path.join(RDConfig.RDContribDir, "SA_Score"))
+import sascorer
 
 # Base URL for the ChEMBL API
 BASE_URL = "https://www.ebi.ac.uk/chembl/api/data"
 
 
-# Function to fetch all molecular entries and their SMILES notations
 def fetch_general_dataset():
+    """Fetch all molecular entries and their SMILES notations from the ChEMBL API."""
     url = f"{BASE_URL}/molecule"
     params = {"format": "json", "limit": 1000, "offset": 0}
     molecules = []
@@ -36,11 +39,11 @@ def fetch_general_dataset():
     return general_df
 
 
-# Function to fetch all reported eIF4E inhibitors and their SMILES notations and IC50 values
 def fetch_targeted_dataset():
+    """Fetch all reported eIF4E inhibitors and their SMILES notations and IC50 values from the ChEMBL API."""
     url = f"{BASE_URL}/activity"
     params = {
-        "target_chembl_id": "CHEMBL4848",  # Replace with actual ChEMBL ID for eIF4E
+        "target_chembl_id": "CHEMBL4848",
         "assay_type": "B",
         "endpoint": "IC50",
         "format": "json",
@@ -68,14 +71,15 @@ def fetch_targeted_dataset():
     return targeted_df
 
 
-# Function to preprocess datasets
 def preprocess_datasets(general_df, targeted_df):
+    """Preprocess the datasets by cleaning and calculating molecular properties."""
     # Remove molecules containing a period (".") in their SMILES notations
     general_df = general_df[~general_df["SMILES"].str.contains(r"\.")]
     targeted_df = targeted_df[~targeted_df["SMILES"].str.contains(r"\.")]
 
     # Remove duplicate entries
     general_df = general_df.drop_duplicates(subset=["SMILES"])
+    targeted_df["IC50"] = pd.to_numeric(targeted_df["IC50"], errors="coerce")
     targeted_df = (
         targeted_df.groupby("SMILES")
         .agg({"ChEMBL_ID": "first", "IC50": "mean"})
@@ -85,18 +89,18 @@ def preprocess_datasets(general_df, targeted_df):
     # Convert IC50 to pIC50 for the targeted dataset
     targeted_df["pIC50"] = -np.log10(targeted_df["IC50"].astype(float))
 
-    # Calculate molecular properties: MW, LogP, QED, SAS
     def calc_properties(smiles):
         mol = MolFromSmiles(smiles)
         if mol:
             mw = Descriptors.MolWt(mol)
             logp = Crippen.MolLogP(mol)
             qed = QED.qed(mol)
-            sas = calculateScore(mol)
+            sas = sascorer.calculateScore(mol)
             return mw, logp, qed, sas
         else:
             return np.nan, np.nan, np.nan, np.nan
 
+    # Calculate molecular properties: MW, LogP, QED, SAS
     general_df[["MW", "LogP", "QED", "SAS"]] = general_df["SMILES"].apply(
         lambda x: pd.Series(calc_properties(x))
     )
