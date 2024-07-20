@@ -3,6 +3,7 @@ import sys
 import requests
 import pandas as pd
 import numpy as np
+from requests.adapters import HTTPAdapter, Retry
 from rdkit.Chem import Crippen, Descriptors, MolFromSmiles, QED, RDConfig
 from selfies import encoder as sf_encoder
 
@@ -12,6 +13,11 @@ import sascorer
 
 # Base URL for the ChEMBL API
 BASE_URL = "https://www.ebi.ac.uk/chembl/api/data"
+
+# Setup a session with retries
+session = requests.Session()
+retries = Retry(total=5, backoff_factor=1, status_forcelist=[502, 503, 504])
+session.mount("https://", HTTPAdapter(max_retries=retries))
 
 
 def fetch_general_dataset():
@@ -30,7 +36,7 @@ def fetch_general_dataset():
     molecules = []
 
     while True:
-        response = requests.get(url, params=params, timeout=10)
+        response = session.get(url, params=params, timeout=10)
         response.raise_for_status()
         data = response.json()
         molecules.extend(data["molecules"])
@@ -73,7 +79,7 @@ def fetch_targeted_dataset():
     activities = []
 
     while True:
-        response = requests.get(url, params=params, timeout=10)
+        response = session.get(url, params=params, timeout=10)
         response.raise_for_status()
         data = response.json()
         activities.extend(data["activities"])
