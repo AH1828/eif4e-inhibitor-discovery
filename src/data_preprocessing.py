@@ -71,7 +71,7 @@ def fetch_targeted_dataset():
     params = {
         "target_chembl_id": "CHEMBL4848",
         "assay_type": "B",
-        "endpoint": "IC50",
+        "standard_type": "IC50",
         "format": "json",
         "limit": 1000,
         "offset": 0,
@@ -172,9 +172,9 @@ def preprocess_datasets(general_df, targeted_df):
     targeted_df["SELFIES"] = targeted_df["SMILES"].apply(sf_encoder)
     print("Converted SMILES to SELFIES")
 
-    # Remove molecules with SELFIES strings longer than 100 characters
-    general_df = general_df[general_df["SELFIES"].apply(len) <= 100]
-    targeted_df = targeted_df[targeted_df["SELFIES"].apply(len) <= 100]
+    ## Remove molecules with SELFIES strings longer than 100 characters
+    # general_df = general_df[general_df["SELFIES"].apply(len) <= 100]
+    # targeted_df = targeted_df[targeted_df["SELFIES"].apply(len) <= 100]
     print(
         f"Filtered out molecules with SELFIES longer than 100 characters: {len(general_df)} general, {len(targeted_df)} targeted"
     )
