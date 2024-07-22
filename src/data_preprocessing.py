@@ -6,6 +6,7 @@ import numpy as np
 from requests.adapters import HTTPAdapter, Retry
 from rdkit.Chem import Crippen, Descriptors, MolFromSmiles, QED, RDConfig
 from selfies import encoder as sf_encoder
+import selfies as sf
 
 # Custom functions
 sys.path.append(os.path.join(RDConfig.RDContribDir, "SA_Score"))
@@ -172,9 +173,9 @@ def preprocess_datasets(general_df, targeted_df):
     targeted_df["SELFIES"] = targeted_df["SMILES"].apply(sf_encoder)
     print("Converted SMILES to SELFIES")
 
-    ## Remove molecules with SELFIES strings longer than 100 characters
-    # general_df = general_df[general_df["SELFIES"].apply(len) <= 100]
-    # targeted_df = targeted_df[targeted_df["SELFIES"].apply(len) <= 100]
+    # Remove molecules with SELFIES strings longer than 100 characters
+    general_df = general_df[general_df["SELFIES"].apply(sf.len_selfies) <= 100]
+    targeted_df = targeted_df[targeted_df["SELFIES"].apply(sf.len_selfies) <= 100]
     print(
         f"Filtered out molecules with SELFIES longer than 100 characters: {len(general_df)} general, {len(targeted_df)} targeted"
     )
