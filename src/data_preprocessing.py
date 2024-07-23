@@ -125,8 +125,8 @@ def preprocess_datasets(general_df, targeted_df):
         f"Filtered out molecules with periods in SMILES: {len(general_df)} general, {len(targeted_df)} targeted"
     )
 
-    # Remove duplicate entries
-    general_df = general_df.drop_duplicates(subset=["SMILES"])
+    # Remove duplicate entries (average IC50 values for targeted dataset)
+    general_df = general_df.drop_duplicates(subset=["SMILES"]).reset_index(drop=True)
     targeted_df["IC50"] = pd.to_numeric(targeted_df["IC50"], errors="coerce")
     targeted_df = (
         targeted_df.groupby("SMILES")
@@ -161,16 +161,36 @@ def preprocess_datasets(general_df, targeted_df):
 
     # Calculate molecular properties: MW, LogP, QED, SAS
     general_df[["MW", "LogP", "QED", "SAS"]] = general_df["SMILES"].apply(
-        lambda x: pd.Series(calc_properties(x))
-    )
+        lambda x: pd.Series(calc_properties(x)))
     targeted_df[["MW", "LogP", "QED", "SAS"]] = targeted_df["SMILES"].apply(
-        lambda x: pd.Series(calc_properties(x))
-    )
+        lambda x: pd.Series(calc_properties(x)))
     print("Calculated molecular properties for both datasets")
 
-    # Convert SMILES to SELFIES
-    general_df["SELFIES"] = general_df["SMILES"].apply(sf_encoder)
-    targeted_df["SELFIES"] = targeted_df["SMILES"].apply(sf_encoder)
+    # Remove invalid SMILES
+    for i in range(len(general_df)):
+        sm = general_df.at[i, "SMILES"]
+        if MolFromSmiles(sm) is None:
+            general_df.drop(labels=i, inplace=True)
+    general_df.reset_index(drop=True, inplace=True)
+    for i in range(len(targeted_df)):
+        sm = targeted_df.at[i, "SMILES"]
+        if MolFromSmiles(sm) is None:
+            targeted_df.drop(labels=i, inplace=True)
+    targeted_df.reset_index(drop=True, inplace=True)
+    print("Removed invalid SMILES")
+
+    def smiles_converter(smiles):
+        try:
+            return sf_encoder(smiles)
+        except Exception as e:
+            print(f"Error encoding SMILES {smiles}: {e}")
+            return None
+
+    # Convert SMILES to SELFIES + drop rows with no SELFIES
+    general_df["SELFIES"] = general_df["SMILES"].apply(smiles_converter)
+    general_df = general_df.dropna(subset=["SELFIES"]).reset_index(drop=True)
+    targeted_df["SELFIES"] = targeted_df["SMILES"].apply(smiles_converter)
+    targeted_df = targeted_df.dropna(subset=["SELFIES"]).reset_index(drop=True)
     print("Converted SMILES to SELFIES")
 
     # Remove molecules with SELFIES strings longer than 100 characters
