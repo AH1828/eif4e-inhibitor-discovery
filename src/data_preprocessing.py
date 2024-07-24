@@ -93,9 +93,9 @@ def fetch_targeted_dataset():
         params["offset"] += params["limit"]
 
     targeted_data = [
-        (act["molecule_chembl_id"], act["canonical_smiles"], act["value"])
+        (act["molecule_chembl_id"], act["canonical_smiles"], act["standard_value"])
         for act in activities
-        if "canonical_smiles" in act and "value" in act
+        if "canonical_smiles" in act and "standard_value" in act
     ]
 
     print(f"Total activities fetched: {len(targeted_data)}")
@@ -136,7 +136,25 @@ def preprocess_datasets(general_df, targeted_df):
     print("Removed duplicates and grouped targeted dataset by SMILES")
 
     # Convert IC50 to pIC50 for the targeted dataset
-    targeted_df["pIC50"] = -np.log10(targeted_df["IC50"].astype(float))
+    def norm_value(input_df):
+        norm = []
+        for i in input_df['IC50']:
+            if float(i) > 100000000:
+                i = 100000000
+            norm.append(float(i))
+        input_df['IC50_norm'] = norm
+        return input_df
+    
+    def pIC50(input_df):
+        pIC50 = []
+        for i in input_df['IC50_norm']:
+            molar = i*(10 ** -9) # Convert nM to M
+            pIC50.append(-np.log10(molar))
+        input_df['pIC50'] = pIC50
+        x = input_df.drop('IC50_norm', axis=1)
+        return x
+
+    targeted_df = pIC50(norm_value(targeted_df))
     print("Converted IC50 to pIC50 for targeted dataset")
 
     def calc_properties(smiles):
