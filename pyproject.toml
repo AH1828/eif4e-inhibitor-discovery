@@ -3,7 +3,9 @@ name = "eif4e-inhibitor-discovery"
 version = "0.1.0"
 description = "An integrated in silico approach for AI-enhanced discovery of novel eIF4E inhibitors targeting drug-resistant ER+ breast cancer"
 authors = [
-    {name = "Zeyu Yao", email = "zeyu.yao@stonybrook.edu"},
+    { name = "Zeyu Yao", email = "zeyu.yao@stonybrook.edu" },
+    { name = "Audrey Huang", email = "audrey.huang.1@stonybrook.edu" },
+    { name = "Xingchuan Ma", email = "xingchuan.ma@stonybrook.edu" },
 ]
 dependencies = [
     "requests>=2.32.3",
@@ -17,8 +19,7 @@ dependencies = [
 ]
 requires-python = "==3.10.*"
 readme = "README.md"
-license = {text = "MIT"}
-
+license = { text = "MIT" }
 
 [tool.pdm]
 distribution = false
