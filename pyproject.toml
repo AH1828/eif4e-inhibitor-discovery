@@ -11,6 +11,9 @@ dependencies = [
     "rdkit>=2024.3.3",
     "selfies>=2.1.2",
     "numpy>=1.26.4",
+    "keras-tuner>=1.4.7",
+    "tensorflow>=2.17.0",
+    "matplotlib>=3.9.1",
 ]
 requires-python = "==3.10.*"
 readme = "README.md"
