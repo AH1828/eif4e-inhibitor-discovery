@@ -461,10 +461,8 @@ def sample_train_predictions(model, df, vocab, save_path):
 if __name__ == "__main__":
     start_time = time.time()
 
-    path = "C:\\Users\\Audrey\\eif4e-inhibitor-discovery\\src\\AE\\"
-    file = (
-        "C:\\Users\\Audrey\\eif4e-inhibitor-discovery\\src\\datasets\\subset_500k.csv"
-    )
+    path = "/AE/"
+    file = "/datasets/subset_500k.csv"
 
     with open(path + "logistics.txt", "w", encoding="utf-8") as run_logistics:
         selfies_file = pd.read_csv(file)
