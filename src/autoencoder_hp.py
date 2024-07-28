@@ -6,9 +6,14 @@ from keras_tuner import HyperModel, RandomSearch
 from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau
 from tensorflow.keras.optimizers import Adam
 
-from src.Vocabulary import Vocabulary
-from src.autoencoder import Autoencoder
+import sys
+import os
 
+# Add the path to the src directory
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'src')))
+
+from Vocabulary import Vocabulary
+from autoencoder import Autoencoder
 
 class AutoencoderHyperModel(HyperModel):
     """
@@ -57,10 +62,15 @@ class AutoencoderHyperModel(HyperModel):
 
 
 PATH = "/AE/"
-FILE = "/datasets/subset_500k.csv"
+FILE = "/datasets/targeted_dataset.csv"
 
 # Ensure the logistics file exists before writing to it
-logistics_path = PATH + "logistics.txt"
+logistics_path = os.path.join(PATH, "logistics.txt")
+
+# Ensure the directory exists
+if not os.path.exists(PATH):
+    os.makedirs(PATH)
+
 with open(logistics_path, "w", encoding="utf-8") as run_logistics:
     selfies_file = pd.read_csv(FILE)
     selfies = list(selfies_file["SELFIES"])
