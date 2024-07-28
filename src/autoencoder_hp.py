@@ -50,8 +50,8 @@ class AutoencoderHyperModel(HyperModel):
         
         return model
 
-path = 'C:\\Users\\Audrey\\eif4e-inhibitor-discovery\\src\\AE\\'
-file = 'C:\\Users\\Audrey\\eif4e-inhibitor-discovery\\src\\datasets\\subset_500k.csv'
+path = '/AE/'
+file = '/datasets/subset_500k.csv'
 
 run_logistics = open(path + 'logistics.txt', 'w')
 
