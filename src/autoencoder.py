@@ -1,3 +1,4 @@
+import sys
 import os
 import random
 import time
@@ -21,8 +22,9 @@ from tensorflow.keras.layers import (
 )
 from tensorflow.keras.optimizers import Adam
 
+# Add the path to the src directory
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'src')))
 from Vocabulary import Vocabulary
-
 
 class Autoencoder:
     """
@@ -145,7 +147,8 @@ class Autoencoder:
         )
 
         if self.write:
-            with open(self.path + "selfies_to_latent.txt", "w", encoding="utf-8") as f:
+            sf_to_l = os.path.join(self.path, "selfies_to_latent.txt")
+            with open(sf_to_l, "w", encoding="utf-8") as f:
                 self.selfies_to_latent_model.summary(
                     print_fn=lambda x: f.write(x + "\n")
                 )
@@ -177,7 +180,8 @@ class Autoencoder:
             latent_input, decoded_states, name="latent_to_states_model"
         )
         if self.write:
-            with open(self.path + "latent_to_states.txt", "w", encoding="utf-8") as f:
+            l_to_st = os.path.join(self.path, "latent_to_states.txt")
+            with open(l_to_st, "w", encoding="utf-8") as f:
                 self.latent_to_states_model.summary(
                     print_fn=lambda x: f.write(x + "\n")
                 )
@@ -215,7 +219,8 @@ class Autoencoder:
             inputs=inputs, outputs=[outputs], name="states_to_selfies_model"
         )
         if self.write:
-            with open(self.path + "states_to_selfies.txt", "w", encoding="utf-8") as f:
+            st_to_sf = os.path.join(self.path, "states_to_selfies.txt")
+            with open(st_to_sf, "w", encoding="utf-8") as f:
                 self.states_to_selfies_model.summary(
                     print_fn=lambda x: f.write(x + "\n")
                 )
@@ -450,9 +455,8 @@ def sample_train_predictions(model, df, vocab, save_path):
                 cur_selfies += cur_char
         predicted_selfies.append(cur_selfies)
 
-    with open(
-        save_path + "sample_train_predictions.txt", "w", encoding="utf-8"
-    ) as predictions:
+    predictions_path = os.path.join(save_path, "sample_train_predictions.txt")
+    with open(predictions_path, "w", encoding="utf-8") as predictions:
         for i in range(len(predicted_selfies)):
             predictions.write("Actu: " + sampled_selfies[i])
             predictions.write("\nPred: " + predicted_selfies[i] + "\n")
@@ -461,10 +465,11 @@ def sample_train_predictions(model, df, vocab, save_path):
 if __name__ == "__main__":
     start_time = time.time()
 
-    path = "/AE/"
-    file = "/datasets/subset_500k.csv"
-
-    with open(path + "logistics.txt", "w", encoding="utf-8") as run_logistics:
+    path = "/gpfs/home/auhhuang/eif4e-inhibitor-discovery/src/AE"
+    file = "/gpfs/home/auhhuang/eif4e-inhibitor-discovery/src/datasets/subset_500k.csv"
+    
+    logistics_path = os.path.join(path, "logistics.txt")
+    with open(logistics_path, "w", encoding="utf-8") as run_logistics:
         selfies_file = pd.read_csv(file)
         selfies = list(selfies_file["SELFIES"])
         random.shuffle(selfies)
@@ -519,9 +524,8 @@ if __name__ == "__main__":
     for lv in latent_vectors:
         predicted_selfies.append(auto.latent_to_selfies(lv, vocab))
 
-    with open(
-        path + "sample_test_predictions2.txt", "w", encoding="utf-8"
-    ) as example_predictions:
+    predictions_path2 = os.path.join(path, "sample_test_predictions2.txt")
+    with open(predictions_path2, "w", encoding="utf-8") as example_predictions:
         for i in range(len(selfies_test)):
             example_predictions.write("Actu: " + selfies_test[i])
             example_predictions.write("\nPred: " + predicted_selfies[i] + "\n")
@@ -534,7 +538,8 @@ if __name__ == "__main__":
     print(percent_partial_success)
     _, percent_valid = validity(predicted_selfies)
 
-    with open(path + "results.txt", "w", encoding="utf-8") as test_metrics:
+    results_path = os.path.join(path, "results.txt")
+    with open(results_path, "w", encoding="utf-8") as test_metrics:
         test_metrics.write(
             "Percent Total Successful: " + str(round(percent_success, 4))
         )
@@ -543,7 +548,7 @@ if __name__ == "__main__":
         )
         test_metrics.write("\nPercent Valid: " + str(round(percent_valid, 4)))
 
-    with open(path + "logistics.txt", "a", encoding="utf-8") as run_logistics:
+    with open(logistics_path, "a", encoding="utf-8") as run_logistics:
         run_logistics.write(
             "\nTime (seconds): " + str(round(time.time() - start_time, 3))
         )
