@@ -61,15 +61,11 @@ class AutoencoderHyperModel(HyperModel):
         return model
 
 
-PATH = "/AE/"
-FILE = "/datasets/targeted_dataset.csv"
-
-# Ensure the logistics file exists before writing to it
+# Define the paths
+PATH = "/gpfs/home/auhhuang/eif4e-inhibitor-discovery/src"
+DATASETS_PATH = os.path.join(PATH, "datasets")
+FILE = os.path.join(DATASETS_PATH, "subset_500k.csv")
 logistics_path = os.path.join(PATH, "logistics.txt")
-
-# Ensure the directory exists
-if not os.path.exists(PATH):
-    os.makedirs(PATH)
 
 with open(logistics_path, "w", encoding="utf-8") as run_logistics:
     selfies_file = pd.read_csv(FILE)
@@ -107,7 +103,7 @@ tuner = RandomSearch(
     objective="val_loss",
     max_trials=50,
     executions_per_trial=1,
-    directory="eif4e",
+    directory="eif4e-inhibitor",
     project_name="ae_hyperparams",
 )
 
