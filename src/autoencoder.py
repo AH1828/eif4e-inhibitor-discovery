@@ -264,7 +264,7 @@ class Autoencoder:
                 clipvalue=3,
             )
 
-        checkpoint_file = os.path.join(self.path, "model--{epoch:02d}.h5")
+        checkpoint_file = os.path.join(self.path, "model--{epoch:02d}.keras")
         checkpoint = ModelCheckpoint(
             checkpoint_file, monitor="val_loss", mode="min", save_best_only=True
         )
@@ -297,9 +297,9 @@ class Autoencoder:
 
         self.build_sample_model()
         self.build_sm_to_lat()
-        self.model.save(os.path.join(self.path, "AE_model.h5"))
-        self.sample_model.save(os.path.join(self.path, "decoder_model.h5"))
-        self.sm_to_lat_model.save(os.path.join(self.path, "encoder_model.h5"))
+        self.model.save(os.path.join(self.path, "AE_model.keras"))
+        self.sample_model.save(os.path.join(self.path, "decoder_model.keras"))
+        self.sm_to_lat_model.save(os.path.join(self.path, "encoder_model.keras"))
 
     def build_sample_model(self):
         """
@@ -465,7 +465,7 @@ def sample_train_predictions(model, df, vocab, save_path):
 if __name__ == "__main__":
     start_time = time.time()
 
-    path = "/gpfs/home/auhhuang/eif4e-inhibitor-discovery/src/AE"
+    path = "/gpfs/home/auhhuang/eif4e-inhibitor-discovery/src/AE/"
     file = "/gpfs/home/auhhuang/eif4e-inhibitor-discovery/src/datasets/subset_500k.csv"
     
     logistics_path = os.path.join(path, "logistics.txt")
@@ -562,9 +562,9 @@ if __name__ == "__main__":
         for e in epochs:
             if e != max_epoch:
                 if int(e / 10) == 0:
-                    file_name = "model--0" + str(e) + ".h5"
+                    file_name = "model--0" + str(e) + ".keras"
                 else:
-                    file_name = "model--" + str(e) + ".h5"
+                    file_name = "model--" + str(e) + ".keras"
                 os.remove(path + file_name)
     else:
         print("No models found in the specified directory.")
