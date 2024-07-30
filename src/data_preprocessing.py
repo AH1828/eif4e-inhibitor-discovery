@@ -36,16 +36,16 @@ def fetch_general_dataset():
     params = {"format": "json", "limit": 1000, "offset": 0}
     molecules = []
 
-    while True:
-        response = session.get(url, params=params, timeout=10)
-        response.raise_for_status()
-        data = response.json()
-        molecules.extend(data["molecules"])
-        print(f"Fetched {len(data['molecules'])} molecules, offset: {params['offset']}")
+    #while True:
+    response = session.get(url, params=params, timeout=10)
+    response.raise_for_status()
+    data = response.json()
+    molecules.extend(data["molecules"])
+    print(f"Fetched {len(data['molecules'])} molecules, offset: {params['offset']}")
 
-        if not data["page_meta"].get("next"):
-            break
-        params["offset"] += params["limit"]
+        # if not data["page_meta"].get("next"):
+        #     break
+        # params["offset"] += params["limit"]
 
     smiles_data = [
         (mol["molecule_chembl_id"], mol["molecule_structures"]["canonical_smiles"])
@@ -134,6 +134,10 @@ def preprocess_datasets(general_df, targeted_df):
         .reset_index()
     )
     print("Removed duplicates and grouped targeted dataset by SMILES")
+
+    # Remove rows in targeted datset with missing IC50 values
+    targeted_df = targeted_df.dropna(subset=["IC50"]).reset_index(drop=True)
+    print("Removed rows with missing values")
 
     # Convert IC50 to pIC50 for the targeted dataset
     def norm_value(input_df):
