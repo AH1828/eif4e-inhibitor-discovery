@@ -36,16 +36,16 @@ def fetch_general_dataset():
     params = {"format": "json", "limit": 1000, "offset": 0}
     molecules = []
 
-    #while True:
-    response = session.get(url, params=params, timeout=10)
-    response.raise_for_status()
-    data = response.json()
-    molecules.extend(data["molecules"])
-    print(f"Fetched {len(data['molecules'])} molecules, offset: {params['offset']}")
+    while True:
+        response = session.get(url, params=params, timeout=10)
+        response.raise_for_status()
+        data = response.json()
+        molecules.extend(data["molecules"])
+        print(f"Fetched {len(data['molecules'])} molecules, offset: {params['offset']}")
 
-        # if not data["page_meta"].get("next"):
-        #     break
-        # params["offset"] += params["limit"]
+        if not data["page_meta"].get("next"):
+            break
+        params["offset"] += params["limit"]
 
     smiles_data = [
         (mol["molecule_chembl_id"], mol["molecule_structures"]["canonical_smiles"])
@@ -224,18 +224,18 @@ def preprocess_datasets(general_df, targeted_df):
 
     return general_df, targeted_df
 
+if __name__ == "__main__":
+    # Fetch the datasets
+    general_dataset = fetch_general_dataset()
+    targeted_dataset = fetch_targeted_dataset()
 
-# Fetch the datasets
-general_dataset = fetch_general_dataset()
-targeted_dataset = fetch_targeted_dataset()
+    # Preprocess the datasets
+    general_dataset, targeted_dataset = preprocess_datasets(
+        general_dataset, targeted_dataset
+    )
 
-# Preprocess the datasets
-general_dataset, targeted_dataset = preprocess_datasets(
-    general_dataset, targeted_dataset
-)
+    # Save datasets to CSV files
+    general_dataset.to_csv("general_dataset.csv", index=False)
+    targeted_dataset.to_csv("targeted_dataset.csv", index=False)
 
-# Save datasets to CSV files
-general_dataset.to_csv("general_dataset.csv", index=False)
-targeted_dataset.to_csv("targeted_dataset.csv", index=False)
-
-print("Datasets have been fetched, processed, and saved successfully.")
+    print("Datasets have been fetched, processed, and saved successfully.")
