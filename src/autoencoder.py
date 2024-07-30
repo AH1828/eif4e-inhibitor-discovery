@@ -9,6 +9,7 @@ import selfies as sf
 from matplotlib import pyplot as plt
 from rdkit.Chem import MolFromSmiles
 from tensorflow.keras import Model
+from tensorflow.keras.models import Model
 from tensorflow.keras.callbacks import ReduceLROnPlateau, EarlyStopping, ModelCheckpoint
 from tensorflow.keras.layers import (
     Concatenate,
@@ -21,6 +22,7 @@ from tensorflow.keras.layers import (
     Embedding,
 )
 from tensorflow.keras.optimizers import Adam
+import h5py
 
 # Add the path to the src directory
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'src')))
@@ -242,9 +244,18 @@ class Autoencoder:
         )
 
     def load_autoencoder_model(self, path):
-        self.model.load_weights(path)
-        self.build_sample_model()
-        self.build_sm_to_lat()
+        try:
+            with h5py.File(path, 'r') as f:
+                for layer in self.model.layers:
+                    if layer.name in f.keys():
+                        g = f[layer.name]
+                        weights = [g[var] for var in g.keys()]
+                        layer.set_weights(weights)
+            self.build_sample_model()
+            self.build_sm_to_lat()
+            print("Weights loaded successfully.")
+        except Exception as e:
+            print("Error loading weights:", e)
 
     def fit_model(self, dataX, dataX2, dataY, epochs, batch_size, optimizer):
         """
