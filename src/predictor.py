@@ -232,22 +232,22 @@ def process_lv(df):
 
 # Function to train and evaluate models for pIC50
 def run_pIC50():
-    # prefix = '/gpfs/home/auhhuang/eif4e-inhibitor-discovery/src/'
-    # path = prefix + 'predictor/'
-    # property = 'pIC50'
-    # vocab_df = pd.read_csv(prefix + 'datasets/subset_500k.csv')
-    # ae_path = prefix + 'models/AE_model.weights.h5'
-    # encoder_path = prefix + 'models/encoder_model.weights.h5'
-    # decoder_path = prefix + 'models/decoder_model.weights.h5'
-    # df = pd.read_csv(prefix + 'datasets/augmented_dataset.csv')
-    prefix = 'C:\\Users\\Audrey\\eif4e-inhibitor-discovery\\src\\'
-    path = prefix + 'predictor\\'
+    prefix = '/gpfs/home/auhhuang/eif4e-inhibitor-discovery/src/'
+    path = prefix + 'predictor/'
     property = 'pIC50'
-    vocab_df = pd.read_csv(prefix + 'datasets\\subset_500k.csv')
-    ae_path = prefix + 'models\\AE_model.weights.h5'
-    encoder_path = prefix + 'models\\encoder_model.weights.h5'
-    decoder_path = prefix + 'models\\decoder_model.weights.h5'
-    df = pd.read_csv(prefix + 'datasets\\augmented_dataset.csv')
+    vocab_df = pd.read_csv(prefix + 'datasets/subset_500k.csv')
+    ae_path = prefix + 'models/AE_model.weights.h5'
+    encoder_path = prefix + 'models/encoder_model.weights.h5'
+    decoder_path = prefix + 'models/decoder_model.weights.h5'
+    df = pd.read_csv(prefix + 'datasets/augmented_dataset.csv')
+    # prefix = 'C:\\Users\\Audrey\\eif4e-inhibitor-discovery\\src\\'
+    # path = prefix + 'predictor\\'
+    # property = 'pIC50'
+    # vocab_df = pd.read_csv(prefix + 'datasets\\subset_500k.csv')
+    # ae_path = prefix + 'models\\AE_model.weights.h5'
+    # encoder_path = prefix + 'models\\encoder_model.weights.h5'
+    # decoder_path = prefix + 'models\\decoder_model.weights.h5'
+    # df = pd.read_csv(prefix + 'datasets\\augmented_dataset.csv')
 
     vocab = Vocabulary(list(vocab_df['SELFIES']))
 
@@ -273,22 +273,22 @@ def run_pIC50():
 
 # Function to train and evaluate models for LogP
 def run_logp():
-    # prefix = '/gpfs/home/auhhuang/eif4e-inhibitor-discovery/src/'
-    # path = prefix + 'predictor/'
-    # property = 'pIC50'
-    # vocab_df = pd.read_csv(prefix + 'datasets/subset_500k.csv')
-    # ae_path = prefix + 'models/AE_model.weights.h5'
-    # encoder_path = prefix + 'models/encoder_model.weights.h5'
-    # decoder_path = prefix + 'models/decoder_model.weights.h5'
-    # df = pd.read_csv(prefix + 'datasets/augmented_dataset.csv')
-    prefix = 'C:\\Users\\Audrey\\eif4e-inhibitor-discovery\\src\\'
-    path = prefix + 'predictor\\'
+    prefix = '/gpfs/home/auhhuang/eif4e-inhibitor-discovery/src/'
+    path = prefix + 'predictor/'
     property = 'LogP'
-    vocab_df = pd.read_csv(prefix + 'datasets\\subset_500k.csv')
-    ae_path = prefix + 'models\\AE_model.weights.h5'
-    encoder_path = prefix + 'models\\encoder_model.weights.h5'
-    decoder_path = prefix + 'models\\decoder_model.weights.h5'
-    df = pd.read_csv(prefix + 'datasets\\subset_500k.csv')
+    vocab_df = pd.read_csv(prefix + 'datasets/subset_500k.csv')
+    ae_path = prefix + 'models/AE_model.weights.h5'
+    encoder_path = prefix + 'models/encoder_model.weights.h5'
+    decoder_path = prefix + 'models/decoder_model.weights.h5'
+    df = pd.read_csv(prefix + 'datasets/augmented_dataset.csv')
+    # prefix = 'C:\\Users\\Audrey\\eif4e-inhibitor-discovery\\src\\'
+    # path = prefix + 'predictor\\'
+    # property = 'LogP'
+    # vocab_df = pd.read_csv(prefix + 'datasets\\subset_500k.csv')
+    # ae_path = prefix + 'models\\AE_model.weights.h5'
+    # encoder_path = prefix + 'models\\encoder_model.weights.h5'
+    # decoder_path = prefix + 'models\\decoder_model.weights.h5'
+    # df = pd.read_csv(prefix + 'datasets\\subset_500k.csv')
 
     vocab = Vocabulary(list(vocab_df['SELFIES']))
 
@@ -314,22 +314,104 @@ def run_logp():
 
 # Function to train and evaluate models for MW
 def run_MW():
-    # prefix = '/gpfs/home/auhhuang/eif4e-inhibitor-discovery/src/'
-    # path = prefix + 'predictor/'
-    # property = 'pIC50'
-    # vocab_df = pd.read_csv(prefix + 'datasets/subset_500k.csv')
-    # ae_path = prefix + 'models/AE_model.weights.h5'
-    # encoder_path = prefix + 'models/encoder_model.weights.h5'
-    # decoder_path = prefix + 'models/decoder_model.weights.h5'
-    # df = pd.read_csv(prefix + 'datasets/augmented_dataset.csv')
-    prefix = 'C:\\Users\\Audrey\\eif4e-inhibitor-discovery\\src\\'
-    path = prefix + 'predictor\\'
+    prefix = '/gpfs/home/auhhuang/eif4e-inhibitor-discovery/src/'
+    path = prefix + 'predictor/'
     property = 'MW'
-    vocab_df = pd.read_csv(prefix + 'datasets\\subset_500k.csv')
-    ae_path = prefix + 'models\\AE_model.weights.h5'
-    encoder_path = prefix + 'models\\encoder_model.weights.h5'
-    decoder_path = prefix + 'models\\decoder_model.weights.h5'
-    df = pd.read_csv(prefix + 'datasets\\subset_500k.csv')
+    vocab_df = pd.read_csv(prefix + 'datasets/subset_500k.csv')
+    ae_path = prefix + 'models/AE_model.weights.h5'
+    encoder_path = prefix + 'models/encoder_model.weights.h5'
+    decoder_path = prefix + 'models/decoder_model.weights.h5'
+    df = pd.read_csv(prefix + 'datasets/augmented_dataset.csv')
+    # prefix = 'C:\\Users\\Audrey\\eif4e-inhibitor-discovery\\src\\'
+    # path = prefix + 'predictor\\'
+    # property = 'MW'
+    # vocab_df = pd.read_csv(prefix + 'datasets\\subset_500k.csv')
+    # ae_path = prefix + 'models\\AE_model.weights.h5'
+    # encoder_path = prefix + 'models\\encoder_model.weights.h5'
+    # decoder_path = prefix + 'models\\decoder_model.weights.h5'
+    # df = pd.read_csv(prefix + 'datasets\\subset_500k.csv')
+
+    vocab = Vocabulary(list(vocab_df['SELFIES']))
+
+    latent_dim = 256
+    embedding_dim = 256
+    lstm_units = 512
+    batch_size = 128
+    batch_norm = True
+    batch_norm_momentum = 0.9
+    numb_dec_layer = 2
+    noise_std = 0.1
+    input_shape = (vocab.max_len, vocab.vocab_size)
+    output_dim = vocab.vocab_size
+    auto = Autoencoder(path, input_shape, latent_dim, lstm_units, output_dim, batch_norm, batch_norm_momentum, noise_std, numb_dec_layer, embedding_dim, vocab.vocab_size, vocab.max_len)
+    auto.load_autoencoder_model(ae_path)
+    auto.load_encoder_model(encoder_path)
+    auto.load_decoder_model(decoder_path)
+
+    predictor = Predictor(path, property, False, 0.8, vocab, auto, df)
+    predictor.train_model()
+    predictor.train_random_forest()
+    predictor.evaluate()
+
+# Function to train and evaluate models for SAS
+def run_SAS():
+    prefix = '/gpfs/home/auhhuang/eif4e-inhibitor-discovery/src/'
+    path = prefix + 'predictor/'
+    property = 'SAS'
+    vocab_df = pd.read_csv(prefix + 'datasets/subset_500k.csv')
+    ae_path = prefix + 'models/AE_model.weights.h5'
+    encoder_path = prefix + 'models/encoder_model.weights.h5'
+    decoder_path = prefix + 'models/decoder_model.weights.h5'
+    df = pd.read_csv(prefix + 'datasets/augmented_dataset.csv')
+    # prefix = 'C:\\Users\\Audrey\\eif4e-inhibitor-discovery\\src\\'
+    # path = prefix + 'predictor\\'
+    # property = 'SAS'
+    # vocab_df = pd.read_csv(prefix + 'datasets\\subset_500k.csv')
+    # ae_path = prefix + 'models\\AE_model.weights.h5'
+    # encoder_path = prefix + 'models\\encoder_model.weights.h5'
+    # decoder_path = prefix + 'models\\decoder_model.weights.h5'
+    # df = pd.read_csv(prefix + 'datasets\\subset_500k.csv')
+
+    vocab = Vocabulary(list(vocab_df['SELFIES']))
+
+    latent_dim = 256
+    embedding_dim = 256
+    lstm_units = 512
+    batch_size = 128
+    batch_norm = True
+    batch_norm_momentum = 0.9
+    numb_dec_layer = 2
+    noise_std = 0.1
+    input_shape = (vocab.max_len, vocab.vocab_size)
+    output_dim = vocab.vocab_size
+    auto = Autoencoder(path, input_shape, latent_dim, lstm_units, output_dim, batch_norm, batch_norm_momentum, noise_std, numb_dec_layer, embedding_dim, vocab.vocab_size, vocab.max_len)
+    auto.load_autoencoder_model(ae_path)
+    auto.load_encoder_model(encoder_path)
+    auto.load_decoder_model(decoder_path)
+
+    predictor = Predictor(path, property, False, 0.8, vocab, auto, df)
+    predictor.train_model()
+    predictor.train_random_forest()
+    predictor.evaluate()
+
+# Function to train and evaluate models for QED
+def run_QED():
+    prefix = '/gpfs/home/auhhuang/eif4e-inhibitor-discovery/src/'
+    path = prefix + 'predictor/'
+    property = 'QED'
+    vocab_df = pd.read_csv(prefix + 'datasets/subset_500k.csv')
+    ae_path = prefix + 'models/AE_model.weights.h5'
+    encoder_path = prefix + 'models/encoder_model.weights.h5'
+    decoder_path = prefix + 'models/decoder_model.weights.h5'
+    df = pd.read_csv(prefix + 'datasets/augmented_dataset.csv')
+    # prefix = 'C:\\Users\\Audrey\\eif4e-inhibitor-discovery\\src\\'
+    # path = prefix + 'predictor\\'
+    # property = 'QED'
+    # vocab_df = pd.read_csv(prefix + 'datasets\\subset_500k.csv')
+    # ae_path = prefix + 'models\\AE_model.weights.h5'
+    # encoder_path = prefix + 'models\\encoder_model.weights.h5'
+    # decoder_path = prefix + 'models\\decoder_model.weights.h5'
+    # df = pd.read_csv(prefix + 'datasets\\subset_500k.csv')
 
     vocab = Vocabulary(list(vocab_df['SELFIES']))
 
@@ -355,3 +437,7 @@ def run_MW():
 
 if __name__ == '__main__':
     run_pIC50()
+    run_LogP()
+    run_MW()
+    run_SAS()
+    run_QED()
