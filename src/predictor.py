@@ -142,8 +142,13 @@ class Predictor():
 
     # Load pre-trained predictor model
     def load_model(self, model_name, suffix=''):
-        self.model.load_weights(self.path) # change depending on which one performs better (comment out one)
-        self.load_random_forest()
+        with h5py.File(path, 'r') as f:
+            for layer in self.model.layers:
+                if layer.name in f.keys():
+                    g = f[layer.name]
+                    weights = [g[var] for var in g.keys()]
+                    layer.set_weights(weights)
+        # self.load_random_forest()
     
     # Evaluate model performance
     def evaluate(self):
