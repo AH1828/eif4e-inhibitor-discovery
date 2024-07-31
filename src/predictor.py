@@ -272,7 +272,7 @@ def run_pIC50():
     predictor.evaluate()
 
 # Function to train and evaluate models for LogP
-def run_logp():
+def run_LogP():
     prefix = '/gpfs/home/auhhuang/eif4e-inhibitor-discovery/src/'
     path = prefix + 'predictor/'
     property = 'LogP'
