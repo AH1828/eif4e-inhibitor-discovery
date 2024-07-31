@@ -94,7 +94,7 @@ class Predictor():
 
     # Create random forest model
     def build_random_forest(self):
-        self.rf_model = RandomForestRegressor(n_estimators=1000, criterion='gini')
+        self.rf_model = RandomForestRegressor(n_estimators=1000)
 
     # Compile and train neural network model
     def train_model(self):
@@ -229,6 +229,8 @@ def run_pIC50():
     property = 'pIC50'
     vocab_df = pd.read_csv(prefix + 'datasets/subset_500k.csv')
     ae_path = prefix + 'models/AE_model.weights.h5'
+    encoder_path = prefix + 'models/encoder_model.weights.h5'
+    decoder_path = prefix + 'models/decoder_model.weights.h5'
     df = pd.read_csv(prefix + 'datasets/augmented_dataset.csv')
 
     vocab = Vocabulary(list(vocab_df['SELFIES']))
@@ -245,6 +247,8 @@ def run_pIC50():
     output_dim = vocab.vocab_size
     auto = Autoencoder(path, input_shape, latent_dim, lstm_units, output_dim, batch_norm, batch_norm_momentum, noise_std, numb_dec_layer, embedding_dim, vocab.vocab_size, vocab.max_len)
     auto.load_autoencoder_model(ae_path)
+    auto.load_encoder_model(encoder_path)
+    auto.load_decoder_model(decoder_path)
 
     predictor = Predictor(path, property, False, 0.8, vocab, auto, df, suffix='_500k')
     predictor.train_model()

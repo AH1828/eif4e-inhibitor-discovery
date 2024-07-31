@@ -244,18 +244,27 @@ class Autoencoder:
         )
 
     def load_autoencoder_model(self, path):
-        try:
-            with h5py.File(path, 'r') as f:
-                for layer in self.model.layers:
-                    if layer.name in f.keys():
-                        g = f[layer.name]
-                        weights = [g[var] for var in g.keys()]
-                        layer.set_weights(weights)
-            self.build_sample_model()
+        with h5py.File(path, 'r') as f:
+            for layer in self.model.layers:
+                if layer.name in f.keys():
+                    g = f[layer.name]
+                    weights = [g[var] for var in g.keys()]
+                    layer.set_weights(weights)
+        self.build_sample_model()
+        self.build_sm_to_lat()
+        print("Weights loaded successfully.")
+
+    def load_encoder_model(self, encoder_path):
+        if not hasattr(self, 'sm_to_lat_model'):
             self.build_sm_to_lat()
-            print("Weights loaded successfully.")
-        except Exception as e:
-            print("Error loading weights:", e)
+        self.sm_to_lat_model.load_weights(encoder_path)
+        print("Encoder weights loaded successfully.")
+
+    def load_decoder_model(self, decoder_path):
+        if not hasattr(self, 'sample_model'):
+            self.build_sample_model()
+        self.sample_model.load_weights(decoder_path)
+        print("Decoder weights loaded successfully.")
 
     def fit_model(self, dataX, dataX2, dataY, epochs, batch_size, optimizer):
         """
