@@ -265,11 +265,14 @@ class WGANGP():
             generated_selfies.append(sml)
         
         valid_selfies, perc_valid = validity(generated_selfies)
-        if save == True: 
-            f = open(os.path.join(run_folder, "Generations/samples_epoch_%d.txt" % (self.epoch)), 'w')
+        if save == True:
+            generated_path = os.path.join(run_folder, 'Generations')
+            os.makedirs(generated_path, exist_ok=True)
+            
+            f = open(os.path.join(generated_path, "samples_epoch_%d.txt" % (self.epoch)), 'w')
             f.write('Percent Valid: ' + str(perc_valid))
-            for sm in generated_selfies:
-                f.write('\n' + sm)
+            for sf in generated_selfies:
+                f.write('\n' + sf)
             f.close()
 
             # Calculate QED for distribution comparison
