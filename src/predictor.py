@@ -42,7 +42,7 @@ class Predictor():
             self.get_latent_representations()
             self.train_test_split()
         self.build_model()
-        self.build_random_forest()
+        # self.build_random_forest()
 
         if self.load:
             self.load_model(self.property, suffix)
@@ -142,16 +142,15 @@ class Predictor():
         self.rf_model = joblib.load(self.path + 'rf_model_' + self.property + '.joblib')
 
     # Load pre-trained predictor model
-    def load_model(self, model_name, suffix=''):
-        path = "C:\\Users\\Audrey\\eif4e-inhibitor-discovery\\src\\models\\predictor_model.weights.h5"
-        # path = "/gpfs/home/auhhuang/eif4e-inhibitor-discovery/src/models/predictor_model.weights.h5"
+    def load_model(self, property, suffix=''):
+        # path = "C:\\Users\\Audrey\\eif4e-inhibitor-discovery\\src\\models\\" + property + "_model.weights.h5"
+        path = "/gpfs/home/auhhuang/eif4e-inhibitor-discovery/src/models/" + property + "_model.weights.h5"
         with h5py.File(path, 'r') as f:
             for layer in self.model.layers:
                 if layer.name in f.keys():
                     g = f[layer.name]
                     weights = [g[var] for var in g.keys()]
                     layer.set_weights(weights)
-        # self.load_random_forest()
     
     # Evaluate model performance
     def evaluate(self):
@@ -182,19 +181,19 @@ class Predictor():
         if string:
             lat_vecs = self.selfies_to_latentvector(selfies)
             nn_predictions = self.model.predict(lat_vecs)
-            rf_predictions = self.rf_model.predict(lat_vecs)
+            # rf_predictions = self.rf_model.predict(lat_vecs)
         else:
             lat_vecs = selfies
             nn_predictions = self.model(lat_vecs)
-            rf_predictions = self.rf_model.predict(lat_vecs)
+            # rf_predictions = self.rf_model.predict(lat_vecs)
         
         nn_predictions = [p[0] for p in nn_predictions]
-        rf_predictions = [p for p in rf_predictions]
+        # rf_predictions = [p for p in rf_predictions]
 
         if tf.is_tensor(nn_predictions[0]):
             nn_predictions = [p.numpy() for p in nn_predictions]
             
-        return nn_predictions, rf_predictions
+        return nn_predictions
 
 def repurpose_for_target(path, property, vocab, auto, df_train, df_repurpose, save_path):
     # Load predictor
@@ -439,5 +438,5 @@ if __name__ == '__main__':
     run_pIC50()
     run_LogP()
     run_MW()
-    run_SAS()
-    run_QED()
+    # run_SAS()
+    # run_QED()
