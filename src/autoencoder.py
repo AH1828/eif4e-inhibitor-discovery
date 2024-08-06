@@ -22,7 +22,6 @@ from tensorflow.keras.layers import (
     Embedding,
 )
 from tensorflow.keras.optimizers import Adam
-import h5py
 
 # Add the path to the src directory
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'src')))
@@ -32,7 +31,6 @@ class Autoencoder:
     """
     Autoencoder class for training and predicting molecular representations.
     """
-
     def __init__(
         self,
         model_path,
@@ -244,36 +242,17 @@ class Autoencoder:
         )
 
     def load_autoencoder_model(self, path):
-        with h5py.File(path, 'r') as f:
-            for layer in self.model.layers:
-                if layer.name in f.keys():
-                    g = f[layer.name]
-                    weights = [g[var] for var in g.keys()]
-                    layer.set_weights(weights)
+        self.model.load_weights(path)
         self.build_sample_model()
         self.build_sm_to_lat()
         print("Weights loaded successfully.")
 
     def load_encoder_model(self, encoder_path):
-        if not hasattr(self, 'sm_to_lat_model'):
-            self.build_sm_to_lat()
-        with h5py.File(encoder_path, 'r') as f:
-            for layer in self.model.layers:
-                if layer.name in f.keys():
-                    g = f[layer.name]
-                    weights = [g[var] for var in g.keys()]
-                    layer.set_weights(weights)
+        self.model.load_weights(encoder_path)
         print("Encoder weights loaded successfully.")
 
     def load_decoder_model(self, decoder_path):
-        if not hasattr(self, 'sample_model'):
-            self.build_sample_model()
-        with h5py.File(decoder_path, 'r') as f:
-            for layer in self.model.layers:
-                if layer.name in f.keys():
-                    g = f[layer.name]
-                    weights = [g[var] for var in g.keys()]
-                    layer.set_weights(weights)
+        self.model.load_weights(decoder_path)
         print("Decoder weights loaded successfully.")
 
     def fit_model(self, dataX, dataX2, dataY, epochs, batch_size, optimizer):
@@ -294,7 +273,7 @@ class Autoencoder:
                 clipvalue=3,
             )
 
-        checkpoint_file = os.path.join(self.path, "model--{epoch:02d}.keras")
+        checkpoint_file = os.path.join(self.path, "model--{epoch:02d}.h5")
         checkpoint = ModelCheckpoint(
             checkpoint_file, monitor="val_loss", mode="min", save_best_only=True
         )
@@ -327,9 +306,9 @@ class Autoencoder:
 
         self.build_sample_model()
         self.build_sm_to_lat()
-        self.model.save(os.path.join(self.path, "AE_model.keras"))
-        self.sample_model.save(os.path.join(self.path, "decoder_model.keras"))
-        self.sm_to_lat_model.save(os.path.join(self.path, "encoder_model.keras"))
+        self.model.save_weights(os.path.join(self.path, "AE_model.h5"), save_format='h5')
+        self.sample_model.save_weights(os.path.join(self.path, "decoder_model.h5"), save_format='h5')
+        self.sm_to_lat_model.save_weights(os.path.join(self.path, "encoder_model.h5"), save_format='h5')
 
     def build_sample_model(self):
         """
@@ -592,9 +571,9 @@ if __name__ == "__main__":
         for e in epochs:
             if e != max_epoch:
                 if int(e / 10) == 0:
-                    file_name = "model--0" + str(e) + ".keras"
+                    file_name = "model--0" + str(e) + ".h5"
                 else:
-                    file_name = "model--" + str(e) + ".keras"
+                    file_name = "model--" + str(e) + ".h5"
                 os.remove(path + file_name)
     else:
         print("No models found in the specified directory.")
