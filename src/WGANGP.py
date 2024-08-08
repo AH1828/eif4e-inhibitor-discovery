@@ -114,7 +114,7 @@ class WGANGP():
         # Real samples
         data = x_train
         # Noise from normal distribution for generator
-        noise = np.random.uniform(-1,1,(self.batch_size, self.z_dim))
+        noise = np.random.normal(0, 1, (self.batch_size, self.z_dim))
 
         with tf.GradientTape() as critic_tape:
             self.critic.training = True
@@ -242,20 +242,20 @@ class WGANGP():
                         # Ensure the directory exists
                         weights_dir = os.path.join(run_folder, 'weights')
                         os.makedirs(weights_dir, exist_ok=True)
-                        self.critic.save_weights(os.path.join(run_folder, 'weights/critic_weights.keras'))
-                        self.generator.save_weights(os.path.join(run_folder, 'weights/generator_weights.keras'))
+                        self.critic.save_weights(os.path.join(run_folder, 'weights/critic_weights.h5'), save_format='h5')
+                        self.generator.save_weights(os.path.join(run_folder, 'weights/generator_weights.h5'), save_format='h5')
                         self.sample_data(200, run_folder, train_distribution, save=True)
                     if epoch == 2500 or epoch == 5000 or epoch == 7500:
                         self.plot_loss(run_folder)
-                        self.critic.save_weights(os.path.join(run_folder, 'weights/critic_weights_' + str(epoch) + '.keras'))
-                        self.generator.save_weights(os.path.join(run_folder, 'weights/generator_weights_' + str(epoch) + '.keras'))
+                        self.critic.save_weights(os.path.join(run_folder, 'weights/critic_weights_' + str(epoch) + '.h5'), save_format='h5')
+                        self.generator.save_weights(os.path.join(run_folder, 'weights/generator_weights_' + str(epoch) + '.h5'), save_format='h5')
             self.epoch += 1
 
     def sample_data(self, n, run_folder, train_distribution, save):
         print('Sampling data...')
 
         # Make generations
-        noise = np.random.uniform(-1,1,(n, self.z_dim))
+        noise = np.random.normal(0, 1, (n, self.z_dim))
         generated_data = self.generator.predict(noise)
 
         # Transform generations into SELFIES with decoder
@@ -285,8 +285,8 @@ class WGANGP():
 
     # Save generator and critic models
     def save_model(self, run_folder):
-        self.critic.save(os.path.join(run_folder, 'critic.keras'))
-        self.generator.save(os.path.join(run_folder, 'generator.keras'))
+        self.critic.save(os.path.join(run_folder, 'critic.h5'), save_format='h5')
+        self.generator.save(os.path.join(run_folder, 'generator.h5'), save_format='h5')
 
     # Load weights from saved generator and critic models
     def load_weights(self, filepath_critic, filepath_generator, vocab, autoencoder):
@@ -337,7 +337,7 @@ class WGANGP():
         print('Started sampling...')
 
         # Make generations
-        noise = np.random.uniform(-1,1,(n, self.z_dim))
+        noise = np.random.normal(0, 1, (n, self.z_dim))
         generated_data = self.generator.predict(noise)
 
         # Transform generations into SELFIES with decoder
@@ -395,6 +395,63 @@ class WGANGP():
         print('Validity: ' + str(n_valid / n))
         print('Uniqueness: ' + str(len(df) / n_valid) + '%')
 
+    def make_generations_batch(self, n, save_path, checkpoint_path, batch_size=1024):
+        print('Started sampling...')
+    
+        # Make generations
+        noise = np.random.normal(0, 1, (n, self.z_dim))
+        
+        # Split noise into batches
+        noise_batches = np.array_split(noise, n // batch_size)
+    
+        generated_selfies = []
+        canon_smiles = []
+        total_generated = 0
+    
+        for batch_idx, noise_batch in enumerate(noise_batches):
+            # Generate data in batches
+            generated_data_batch = self.generator.predict(noise_batch)
+    
+            for i in range(generated_data_batch.shape[0]):
+                sel = self.autoencoder.latent_to_selfies(generated_data_batch[i], self.vocab)
+                sm = sf.decoder(sel)
+                if sm is not None:
+                    mol = MolFromSmiles(sm)
+                    if mol is not None:
+                        canon_smiles.append(MolToSmiles(mol))
+                        generated_selfies.append(sel)
+                        total_generated += 1
+    
+                # Checkpoint
+                if (total_generated % 1000) == 0 and total_generated != 0:
+                    checkpoint_file = f"{checkpoint_path}checkpoints.csv"
+                    if total_generated == 10000:
+                        checkpoint_file = checkpoint_path + 'gen_10k.csv'
+                    elif total_generated == 50000:
+                        checkpoint_file = checkpoint_path + 'gen_50k.csv'
+                    elif total_generated == 100000:
+                        checkpoint_file = checkpoint_path + 'gen_100k.csv'
+                    elif total_generated == 250000:
+                        checkpoint_file = checkpoint_path + 'gen_250k.csv'
+    
+                    df = pd.DataFrame()
+                    df['SMILES'] = canon_smiles
+                    df['SELFIES'] = generated_selfies
+                    df.to_csv(checkpoint_file, index=False)
+    
+            print(f"{total_generated} Done")
+    
+        # Save final generation
+        df = pd.DataFrame()
+        df['SMILES'] = canon_smiles
+        df['SELFIES'] = generated_selfies
+        n_valid = len(df)
+        df.drop_duplicates(subset='SMILES', inplace=True)
+        df.to_csv(save_path, index=False)
+    
+        print('Validity:', n_valid / n)
+        print('Uniqueness:', len(df) / n_valid)
+
 # Determine validity of predictions
 # Output: list of valid SELFIES and percentage of valid SELFIES
 def validity(selfies_list):
@@ -422,7 +479,7 @@ def initialize(main_path):
     generator_batch_norm_momentum = 0.9
     generator_lr = 0.0001
     batch_size = 64
-    critic_optimizer = 'adam'
+    critic_optimizer = 'adam'  
     generator_optimizer = 'adam'
     critic_dropout = 0.2
     generator_dropout = 0.2
@@ -438,27 +495,27 @@ def sample(gan, gen_path, critic_path, vocab, auto, n, save_path, checkpoint_pat
 if __name__ == '__main__':    
     main_path = '/gpfs/home/auhhuang/eif4e-inhibitor-discovery/src/'
     # main_path = 'C:\\Users\\Audrey\\eif4e-inhibitor-discovery\\src\\'
-    vocab_path = main_path + 'datasets/500k_subset.csv'
+    vocab_path = main_path + 'datasets/subset_500k.csv'
     # vocab_path = main_path + 'datasets\\subset_500k.csv'
-    ae_path = main_path + 'models/AE_model.weights.h5'
+    ae_path = main_path + 'AE/model--13.h5'
     # ae_path = main_path + 'models\\AE_model.weights.h5'
-    predictor_path = main_path + 'models/predictor_model.weights.h5'
+    predictor_path = main_path + 'models/'
     # predictor_path = main_path + 'models\\predictor_model.weights.h5'
     predictor_dataset = main_path + 'datasets/augmented_dataset.csv'
     # predictor_dataset = main_path + 'datasets\\targeted_dataset.csv'
-    critic_path = main_path + 'models/critic_chembl_elite.keras'
-    # critic_path = main_path + 'models\\critic_chembl_elite.keras'
-    gen_path = main_path + 'models/generator_chembl_elite.keras'
-    # gen_path = main_path + 'models\\generator_chembl_elite.keras'
+    critic_path = main_path + 'WGANGP_10K_A/weights/critic_weights.h5'
+    # critic_path = main_path + 'models\\critic_chembl_elite.h5'
+    gen_path = main_path + 'WGANGP_10K_A/weights/generator_weights.h5'
+    # gen_path = main_path + 'models\\generator_chembl_elite.h5'
 
-    save_path = main_path + 'WGANGP/generations.csv'
+    save_path = main_path + 'WGANGP_10K_40/generations.csv'
     # save_path = main_path + 'WGANGP\\generations.csv'
-    checkpoint_folder = main_path + 'WGANGP/checkpoints/'
+    checkpoint_folder = main_path + 'WGANGP_10K_40/checkpoints/'
     # checkpoint_folder = main_path + 'WGANGP\\checkpoints/'
     os.makedirs(checkpoint_folder, exist_ok=True)
 
-    vocab, auto, _ = utils.initialize_models(main_path, vocab_path, ae_path, predictor_path, predictor_dataset, suffix='_500k')
+    vocab, auto, predictors = utils.initialize_models(main_path, vocab_path, ae_path, predictor_path, predictor_dataset)
 
     gan = initialize(main_path)
     gan.load_weights(critic_path, gen_path, vocab, auto)
-    sample(gan, gen_path, critic_path, vocab, auto, 1000005, save_path, checkpoint_folder)
+    sample(gan, gen_path, critic_path, vocab, auto, 1005, save_path, checkpoint_folder)
