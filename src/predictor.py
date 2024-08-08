@@ -100,7 +100,7 @@ class Predictor():
     # Compile and train neural network model
     def train_model(self):
         es = EarlyStopping(monitor='val_loss', mode='min', verbose=0, patience=20, restore_best_weights=True)
-        mc = ModelCheckpoint(self.path + 'best_model_' + self.property + '.keras', monitor='val_loss', mode='min', verbose=0, save_best_only=True)
+        mc = ModelCheckpoint(self.path + 'best_model_' + self.property + '.h5', save_format='h5', monitor='val_loss', mode='min', verbose=0, save_best_only=True)
         
         result = self.model.fit(self.X_train, self.Y_train, epochs=self.n_epochs, batch_size=self.batch_size, validation_split=self.validation_split, callbacks = [es, mc], verbose=0)
         
@@ -125,7 +125,7 @@ class Predictor():
         plt.close()
 
         # Save model
-        self.model.save(self.path + 'model_' + self.property + '.keras')
+        self.model.save_weights(self.path + 'model_' + self.property + '.h5', save_format='h5')
         print('NN Done!')
 
     # Train random forest model
@@ -143,14 +143,9 @@ class Predictor():
 
     # Load pre-trained predictor model
     def load_model(self, property, suffix=''):
-        # path = "C:\\Users\\Audrey\\eif4e-inhibitor-discovery\\src\\models\\" + property + "_model.weights.h5"
+        # path = "C:\\Users\\Audrey\\eif4e-inhibitor-discovery\\src\\models\\" + property + "_model.h5"
         path = "/gpfs/home/auhhuang/eif4e-inhibitor-discovery/src/models/" + property + "_model.weights.h5"
-        with h5py.File(path, 'r') as f:
-            for layer in self.model.layers:
-                if layer.name in f.keys():
-                    g = f[layer.name]
-                    weights = [g[var] for var in g.keys()]
-                    layer.set_weights(weights)
+        self.model.load_weights(path)
     
     # Evaluate model performance
     def evaluate(self):
@@ -160,21 +155,22 @@ class Predictor():
         nn_rmse = nn_performance[1]
         nn_mape = nn_performance[2]
 
-        # Evaluate random forest model
+        '''# Evaluate random forest model
         rf_predictions = self.rf_model.predict(self.X_test)
         rf_mse = mean_squared_error(self.Y_test, rf_predictions)
         rf_rmse = np.sqrt(rf_mse)
-        rf_mape = mean_absolute_percentage_error(self.Y_test, rf_predictions)
+        rf_mape = mean_absolute_percentage_error(self.Y_test, rf_predictions)'''
 
         # Save results
         results_path = os.path.join(self.path, f'evaluation_{self.property}.txt')
         with open(results_path, 'w', encoding="utf-8") as results:
             results.write('Neural Network:\n')
             results.write(f'MSE: {round(nn_mse, 4)}\nRMSE: {round(nn_rmse, 4)}\nMAPE: {round(nn_mape, 4)}\n')
-            results.write('\nRandom Forest:\n')
-            results.write(f'MSE: {round(rf_mse, 4)}\nRMSE: {round(rf_rmse, 4)}\nMAPE: {round(rf_mape, 4)}\n')
-
-        return (nn_mse, nn_rmse, nn_mape), (rf_mse, rf_rmse, rf_mape)
+            # results.write('\nRandom Forest:\n')
+            # results.write(f'MSE: {round(rf_mse, 4)}\nRMSE: {round(rf_rmse, 4)}\nMAPE: {round(rf_mape, 4)}\n')
+            
+        return (nn_mse, nn_rmse, nn_mape)
+        # return (nn_mse, nn_rmse, nn_mape), (rf_mse, rf_rmse, rf_mape)
 
     # Make predictions for molecular property
     def predict(self, selfies, string=True):
@@ -232,12 +228,10 @@ def process_lv(df):
 # Function to train and evaluate models for pIC50
 def run_pIC50():
     prefix = '/gpfs/home/auhhuang/eif4e-inhibitor-discovery/src/'
-    path = prefix + 'predictor/'
+    path = prefix + 'predictor_10K/'
     property = 'pIC50'
     vocab_df = pd.read_csv(prefix + 'datasets/subset_500k.csv')
-    ae_path = prefix + 'models/AE_model.weights.h5'
-    encoder_path = prefix + 'models/encoder_model.weights.h5'
-    decoder_path = prefix + 'models/decoder_model.weights.h5'
+    ae_path = prefix + 'AE/model--13.h5'
     df = pd.read_csv(prefix + 'datasets/augmented_dataset.csv')
     # prefix = 'C:\\Users\\Audrey\\eif4e-inhibitor-discovery\\src\\'
     # path = prefix + 'predictor\\'
@@ -262,24 +256,20 @@ def run_pIC50():
     output_dim = vocab.vocab_size
     auto = Autoencoder(path, input_shape, latent_dim, lstm_units, output_dim, batch_norm, batch_norm_momentum, noise_std, numb_dec_layer, embedding_dim, vocab.vocab_size, vocab.max_len)
     auto.load_autoencoder_model(ae_path)
-    auto.load_encoder_model(encoder_path)
-    auto.load_decoder_model(decoder_path)
 
-    predictor = Predictor(path, property, False, 0.8, vocab, auto, df, suffix='_500k')
+    predictor = Predictor(path, property, False, 0.8, vocab, auto, df)
     predictor.train_model()
-    predictor.train_random_forest()
+    # predictor.train_random_forest()
     predictor.evaluate()
 
 # Function to train and evaluate models for LogP
 def run_LogP():
     prefix = '/gpfs/home/auhhuang/eif4e-inhibitor-discovery/src/'
-    path = prefix + 'predictor/'
+    path = prefix + 'predictor_10K/'
     property = 'LogP'
     vocab_df = pd.read_csv(prefix + 'datasets/subset_500k.csv')
-    ae_path = prefix + 'models/AE_model.weights.h5'
-    encoder_path = prefix + 'models/encoder_model.weights.h5'
-    decoder_path = prefix + 'models/decoder_model.weights.h5'
-    df = pd.read_csv(prefix + 'datasets/augmented_dataset.csv')
+    ae_path = prefix + 'AE/model--13.h5'
+    df = pd.read_csv(prefix + 'datasets/subset_10k.csv')
     # prefix = 'C:\\Users\\Audrey\\eif4e-inhibitor-discovery\\src\\'
     # path = prefix + 'predictor\\'
     # property = 'LogP'
@@ -303,24 +293,20 @@ def run_LogP():
     output_dim = vocab.vocab_size
     auto = Autoencoder(path, input_shape, latent_dim, lstm_units, output_dim, batch_norm, batch_norm_momentum, noise_std, numb_dec_layer, embedding_dim, vocab.vocab_size, vocab.max_len)
     auto.load_autoencoder_model(ae_path)
-    auto.load_encoder_model(encoder_path)
-    auto.load_decoder_model(decoder_path)
 
     predictor = Predictor(path, property, False, 0.8, vocab, auto, df)
     predictor.train_model()
-    predictor.train_random_forest()
+    # predictor.train_random_forest()
     predictor.evaluate()
 
 # Function to train and evaluate models for MW
 def run_MW():
     prefix = '/gpfs/home/auhhuang/eif4e-inhibitor-discovery/src/'
-    path = prefix + 'predictor/'
+    path = prefix + 'predictor_10K/'
     property = 'MW'
     vocab_df = pd.read_csv(prefix + 'datasets/subset_500k.csv')
-    ae_path = prefix + 'models/AE_model.weights.h5'
-    encoder_path = prefix + 'models/encoder_model.weights.h5'
-    decoder_path = prefix + 'models/decoder_model.weights.h5'
-    df = pd.read_csv(prefix + 'datasets/augmented_dataset.csv')
+    ae_path = prefix + 'AE/model--13.h5'
+    df = pd.read_csv(prefix + 'datasets/subset_10k.csv')
     # prefix = 'C:\\Users\\Audrey\\eif4e-inhibitor-discovery\\src\\'
     # path = prefix + 'predictor\\'
     # property = 'MW'
@@ -344,24 +330,20 @@ def run_MW():
     output_dim = vocab.vocab_size
     auto = Autoencoder(path, input_shape, latent_dim, lstm_units, output_dim, batch_norm, batch_norm_momentum, noise_std, numb_dec_layer, embedding_dim, vocab.vocab_size, vocab.max_len)
     auto.load_autoencoder_model(ae_path)
-    auto.load_encoder_model(encoder_path)
-    auto.load_decoder_model(decoder_path)
 
     predictor = Predictor(path, property, False, 0.8, vocab, auto, df)
     predictor.train_model()
-    predictor.train_random_forest()
+    # predictor.train_random_forest()
     predictor.evaluate()
 
 # Function to train and evaluate models for SAS
 def run_SAS():
     prefix = '/gpfs/home/auhhuang/eif4e-inhibitor-discovery/src/'
-    path = prefix + 'predictor/'
+    path = prefix + 'predictor_10K/'
     property = 'SAS'
     vocab_df = pd.read_csv(prefix + 'datasets/subset_500k.csv')
-    ae_path = prefix + 'models/AE_model.weights.h5'
-    encoder_path = prefix + 'models/encoder_model.weights.h5'
-    decoder_path = prefix + 'models/decoder_model.weights.h5'
-    df = pd.read_csv(prefix + 'datasets/augmented_dataset.csv')
+    ae_path = prefix + 'AE/model--13.h5'
+    df = pd.read_csv(prefix + 'datasets/subset_10k.csv')
     # prefix = 'C:\\Users\\Audrey\\eif4e-inhibitor-discovery\\src\\'
     # path = prefix + 'predictor\\'
     # property = 'SAS'
@@ -385,24 +367,20 @@ def run_SAS():
     output_dim = vocab.vocab_size
     auto = Autoencoder(path, input_shape, latent_dim, lstm_units, output_dim, batch_norm, batch_norm_momentum, noise_std, numb_dec_layer, embedding_dim, vocab.vocab_size, vocab.max_len)
     auto.load_autoencoder_model(ae_path)
-    auto.load_encoder_model(encoder_path)
-    auto.load_decoder_model(decoder_path)
 
     predictor = Predictor(path, property, False, 0.8, vocab, auto, df)
     predictor.train_model()
-    predictor.train_random_forest()
+    # predictor.train_random_forest()
     predictor.evaluate()
 
 # Function to train and evaluate models for QED
 def run_QED():
     prefix = '/gpfs/home/auhhuang/eif4e-inhibitor-discovery/src/'
-    path = prefix + 'predictor/'
+    path = prefix + 'predictor_10K/'
     property = 'QED'
     vocab_df = pd.read_csv(prefix + 'datasets/subset_500k.csv')
-    ae_path = prefix + 'models/AE_model.weights.h5'
-    encoder_path = prefix + 'models/encoder_model.weights.h5'
-    decoder_path = prefix + 'models/decoder_model.weights.h5'
-    df = pd.read_csv(prefix + 'datasets/augmented_dataset.csv')
+    ae_path = prefix + 'AE/model--13.h5'
+    df = pd.read_csv(prefix + 'datasets/subset_10k.csv')
     # prefix = 'C:\\Users\\Audrey\\eif4e-inhibitor-discovery\\src\\'
     # path = prefix + 'predictor\\'
     # property = 'QED'
@@ -426,12 +404,10 @@ def run_QED():
     output_dim = vocab.vocab_size
     auto = Autoencoder(path, input_shape, latent_dim, lstm_units, output_dim, batch_norm, batch_norm_momentum, noise_std, numb_dec_layer, embedding_dim, vocab.vocab_size, vocab.max_len)
     auto.load_autoencoder_model(ae_path)
-    auto.load_encoder_model(encoder_path)
-    auto.load_decoder_model(decoder_path)
 
     predictor = Predictor(path, property, False, 0.8, vocab, auto, df)
     predictor.train_model()
-    predictor.train_random_forest()
+    # predictor.train_random_forest()
     predictor.evaluate()
 
 if __name__ == '__main__':
